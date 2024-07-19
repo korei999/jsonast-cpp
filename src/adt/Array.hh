@@ -45,10 +45,10 @@ template<typename T, typename ALLOC>
 T*
 Array<T, ALLOC>::push(const T& data)
 {
-    this->pData[this->size++] = data;
-
-    if (this->size >= this->capacity)
+    if (this->size >= this->capacity - 1)
         this->reallocate(this->capacity * 2);
+
+    this->pData[this->size++] = data;
 
     return &this->back();
 }

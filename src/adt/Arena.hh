@@ -27,7 +27,7 @@ struct ArenaBlock
 struct ArenaNode
 {
     ArenaNode* pNext = nullptr;
-    /*ArenaBlock* pBlock;*/
+    ArenaBlock* pBlock;
     size_t size = 0;
     u8 pData[]; /* flexible array member */
 };
@@ -135,12 +135,15 @@ repeat:
     /* skip pNext */
     auto* pFreeBlockOff = ARENA_NODE_GET_FROM_BLOCK(pFreeBlock);
 
-    /* find node with pNext == nullptr, this one is free to allocate */
     ArenaNode* pNode = this->pLatest;
+    /*printf("node:      %p\n", (long)(u8*)pNode);*/
+    /*printf("node.next: %p\n", (long)(u8*)pNode->pNext);*/
     pNode = pNode->pNext;
 
-    /* cast to u8* to get correct byte offsets */
     size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pFreeBlockOff;
+
+    /*printf("nextAligned: %ld\n", (long)nextAligned);*/
+    /*printf("size: %zu\n\n", this->blockSize);*/
 
     /* heap overflow */
     if (nextAligned >= this->blockSize)
@@ -152,7 +155,7 @@ repeat:
 
     pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
     pNode->size = requested;
-    /*pNode->pBlock = pFreeBlock;*/
+    pNode->pBlock = pFreeBlock;
     this->pLatest = pNode;
 
     return &pNode->pData;
@@ -169,21 +172,22 @@ inline void*
 Arena::realloc(void* p, size_t size)
 {
     ArenaNode* pNode = ARENA_NODE_GET_FROM_DATA(p);
-    /*auto aligned = alignedBytes(size);*/
-    /*size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pNode->pBlock;*/
-    /**/
-    /*if (pNode == this->pLatest && nextAligned < this->blockSize)*/
-    /*{*/
-    /*    printf("HELLO\n");*/
-    /*    pNode->size = size;*/
-    /*    pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);*/
-    /*    return p;*/
-    /*}*/
-    /*else*/
+    auto* pBlockOff = ARENA_NODE_GET_FROM_BLOCK(pNode->pBlock);
+    auto aligned = alignedBytes(size);
+    size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pBlockOff;
+
+    if (pNode == this->pLatest && nextAligned < this->blockSize)
+    {
+        pNode->size = size;
+        pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
+        /*printf("NEXT:      %p\n", (u8*)pNode->pNext);*/
+        return p;
+    }
+    else
     {
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
-        this->free(p);
+        /*this->free(p);*/
         return pR;
     }
 }
