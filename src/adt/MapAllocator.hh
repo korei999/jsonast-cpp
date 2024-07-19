@@ -16,7 +16,7 @@ struct MapAllocator : BaseAllocator
 {
     HashMap<void*> mPMap;
 
-    MapAllocator() : mPMap(&StdAllocator) {}
+    MapAllocator() : mPMap(&StdAllocator, adt::SIZE_MIN) {}
     MapAllocator(size_t prealloc) : mPMap(&StdAllocator, prealloc) {}
 
     virtual void* alloc(size_t memberCount, size_t memberSize) override;
@@ -45,16 +45,13 @@ MapAllocator::free(void* p)
 inline void*
 MapAllocator::realloc(void* p, size_t size)
 {
-    auto pr = ::realloc(p, size);
-    if (p != pr)
-    {
-        auto f = this->mPMap.search(p);
-        this->mPMap.remove(f.idx);
-        this->mPMap.insert(pr);
-        return pr;
-    }
+    auto f = this->mPMap.search(p);
+    if (f.pData) this->mPMap.remove(f.idx);
 
-    return p;
+    auto pr = ::realloc(p, size);
+    this->mPMap.insert(pr);
+
+    return pr;
 };
 
 inline void

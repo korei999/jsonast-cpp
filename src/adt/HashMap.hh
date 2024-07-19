@@ -84,7 +84,7 @@ HashMap<T>::insert(const T& value)
     while (this->aBuckets[idx].bOccupied)
     {
         idx++;
-        if (idx > this->capacity())
+        if (idx >= this->capacity())
             idx = 0;
     }
 

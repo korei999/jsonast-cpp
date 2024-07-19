@@ -13,7 +13,7 @@ main(int argCount, char* paArgs[])
     }
 
     /*adt::Arena arena(adt::SIZE_1M * 200);*/
-    adt::MapAllocator mFreeMap;
+    adt::MapAllocator mFreeMap(adt::SIZE_MIN);
 
     json::Parser p(&mFreeMap);
     p.load(paArgs[1]);
