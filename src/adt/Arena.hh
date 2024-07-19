@@ -46,7 +46,7 @@ struct Arena : BaseAllocator
     virtual void* alloc(size_t memberCount, size_t size) override;
     virtual void free(void* p) override;
     virtual void* realloc(void* p, size_t size) override;
-    void freeArena();
+    void freeAll();
 
 private:
     ArenaBlock* newBlock();
@@ -184,7 +184,7 @@ Arena::realloc(void* p, size_t size)
 }
 
 inline void
-Arena::freeArena()
+Arena::freeAll()
 {
     ARENA_FOREACH_SAFE(this, it, tmp)
         ::free(it);

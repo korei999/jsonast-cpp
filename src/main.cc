@@ -12,16 +12,16 @@ main(int argCount, char* paArgs[])
         exit(3);
     }
 
-    /*adt::Arena arena(adt::SIZE_1M * 200);*/
-    adt::MapAllocator mFreeMap(adt::SIZE_MIN);
+    adt::Arena alloc(adt::SIZE_1M * 200);
+    /*adt::MapAllocator alloc(adt::SIZE_MIN);*/
 
-    json::Parser p(&mFreeMap);
+    json::Parser p(&alloc);
     p.load(paArgs[1]);
     p.parse();
 
     if (argCount >= 3 && adt::String(paArgs[2]) == "-p")
         p.print();
 
-    /*arena.freeArena();*/
-    mFreeMap.freeAll();
+    alloc.freeAll();
+    /*alloc.freeAll();*/
 }
