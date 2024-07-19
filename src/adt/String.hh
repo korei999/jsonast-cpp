@@ -8,20 +8,30 @@
 namespace adt
 {
 
+constexpr size_t
+nullTermStringSize(const char* str)
+{
+    size_t i = 0;
+    while (str[i] != '\0')
+        i++;
+
+    return i;
+}
+
 struct String
 {
     char* pData = nullptr;
     size_t size = 0;
 
-    String() = default;
-    String(char* sNullTerminated) : pData(sNullTerminated), size(strlen(sNullTerminated)) {}
-    String(const char* sNullTerminated) : pData(const_cast<char*>(sNullTerminated)), size(strlen(sNullTerminated)) {}
-    String(char* sNullTerminated, size_t len) : pData(sNullTerminated), size(len) {}
+    constexpr String() = default;
+    constexpr String(char* sNullTerminated) : pData(sNullTerminated), size(nullTermStringSize(sNullTerminated)) {}
+    constexpr String(const char* sNullTerminated) : pData(const_cast<char*>(sNullTerminated)), size(nullTermStringSize(sNullTerminated)) {}
+    constexpr String(char* sNullTerminated, size_t len) : pData(sNullTerminated), size(len) {}
 
-    char& operator[](size_t i) { return this->pData[i]; }
-    const char& operator[](size_t i) const { return this->pData[i]; }
+    constexpr char& operator[](size_t i) { return this->pData[i]; }
+    constexpr const char& operator[](size_t i) const { return this->pData[i]; }
 
-    char* data() { return this->pData; }
+    constexpr char* data() { return this->pData; }
 };
 
 constexpr bool
@@ -45,14 +55,18 @@ find(String sv, char c)
     return NPOS;
 }
 
-template<typename ALLOC>
 constexpr String
-StringCreate(ALLOC* p, const char* str)
+StringCreate(BaseAllocator* p, const char* str, size_t size)
 {
-    size_t size = strlen(str);
     char* pData = static_cast<char*>(p->alloc(size, sizeof(char)));
     strncpy(pData, str, size);
     return {pData, size};
+}
+
+constexpr String
+StringCreate(BaseAllocator* p, const char* str)
+{
+    return StringCreate(p, str, nullTermStringSize(str));
 }
 
 } /* namespace adt */

@@ -5,9 +5,8 @@
 namespace adt
 {
 
-template<typename ALLOC>
 String
-loadFile(ALLOC* pAlloc, String path)
+loadFile(BaseAllocator* pAlloc, String path)
 {
     String ret;
 
