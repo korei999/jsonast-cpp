@@ -135,15 +135,9 @@ repeat:
     /* skip pNext */
     auto* pFreeBlockOff = ARENA_NODE_GET_FROM_BLOCK(pFreeBlock);
 
-    ArenaNode* pNode = this->pLatest;
-    /*printf("node:      %p\n", (long)(u8*)pNode);*/
-    /*printf("node.next: %p\n", (long)(u8*)pNode->pNext);*/
-    pNode = pNode->pNext;
+    ArenaNode* pNode = this->pLatest->pNext;
 
     size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pFreeBlockOff;
-
-    /*printf("nextAligned: %ld\n", (long)nextAligned);*/
-    /*printf("size: %zu\n\n", this->blockSize);*/
 
     /* heap overflow */
     if (nextAligned >= this->blockSize)
@@ -162,10 +156,9 @@ repeat:
 }
 
 inline void
-Arena::free(void* p)
+Arena::free([[maybe_unused]] void* p)
 {
-    ArenaNode* pNode = ARENA_NODE_GET_FROM_DATA(p);
-    pNode->size = 0;
+    /* no individual frees */
 }
 
 inline void*
@@ -179,15 +172,13 @@ Arena::realloc(void* p, size_t size)
     if (pNode == this->pLatest && nextAligned < this->blockSize)
     {
         pNode->size = size;
-        pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
-        /*printf("NEXT:      %p\n", (u8*)pNode->pNext);*/
+        pNode->pNext = (ArenaNode*)((u8*)pNode + aligned + sizeof(ArenaNode));
         return p;
     }
     else
     {
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
-        /*this->free(p);*/
         return pR;
     }
 }
