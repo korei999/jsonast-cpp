@@ -27,7 +27,7 @@ struct ArenaBlock
 struct ArenaNode
 {
     ArenaNode* pNext = nullptr;
-    ArenaBlock* pBlock;
+    /*ArenaBlock* pBlock;*/
     size_t size = 0;
     u8 pData[]; /* flexible array member */
 };
@@ -88,6 +88,7 @@ Arena::newBlock()
     memset(*ppLastBlock, 0, sizeof(ArenaBlock) + this->blockSize);
 
     auto* pNode = ARENA_NODE_GET_FROM_BLOCK(*ppLastBlock);
+    pNode->pNext = pNode; /* so we don't bump the very first one on `alloc()` */
     this->pLatest = pNode;
     this->pLatestBlock = *ppLastBlock;
 
@@ -136,7 +137,7 @@ repeat:
 
     /* find node with pNext == nullptr, this one is free to allocate */
     ArenaNode* pNode = this->pLatest;
-    while (pNode->pNext) pNode = pNode->pNext;
+    pNode = pNode->pNext;
 
     /* cast to u8* to get correct byte offsets */
     size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pFreeBlockOff;
@@ -151,7 +152,7 @@ repeat:
 
     pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
     pNode->size = requested;
-    pNode->pBlock = pFreeBlock;
+    /*pNode->pBlock = pFreeBlock;*/
     this->pLatest = pNode;
 
     return &pNode->pData;
@@ -168,11 +169,12 @@ inline void*
 Arena::realloc(void* p, size_t size)
 {
     ArenaNode* pNode = ARENA_NODE_GET_FROM_DATA(p);
-    auto aligned = alignedBytes(size);
-    size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pNode->pBlock;
-
+    /*auto aligned = alignedBytes(size);*/
+    /*size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pNode->pBlock;*/
+    /**/
     /*if (pNode == this->pLatest && nextAligned < this->blockSize)*/
     /*{*/
+    /*    printf("HELLO\n");*/
     /*    pNode->size = size;*/
     /*    pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);*/
     /*    return p;*/
@@ -182,7 +184,6 @@ Arena::realloc(void* p, size_t size)
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
         this->free(p);
-        /*this->pLatest = pNode;*/
         return pR;
     }
 }
