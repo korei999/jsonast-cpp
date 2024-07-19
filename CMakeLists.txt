@@ -11,12 +11,17 @@ endif()
 
 project(jsonast-cpp VERSION 0.1 LANGUAGES CXX)
 
-add_compile_options(-Wall -Wextra -Wswitch -Wimplicit-fallthrough -Wno-class-memaccess)
+add_compile_options(-Wall -Wextra -Wswitch -Wimplicit-fallthrough)
 add_compile_definitions("-DLOGS") # used for LOG_* and COUT/CERR macros
 add_compile_definitions("-D_DEFAULT_SOURCE") # needed for reallocarray
 add_compile_definitions("-DJSONASTCPP_VERSION=${CMAKE_PROJECT_VERSION}")
 message(STATUS "CMAKE_PROJECT_VERSION: '${CMAKE_PROJECT_VERSION}'")
 include_directories(BEFORE "src/adt")
+
+message (STATUS "CMAKE_CXX_COMPILER_ID: '${CMAKE_CXX_COMPILER_ID}'")
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    add_compile_options(-Wno-class-memaccess)
+endif()
 
 add_executable(
     ${CMAKE_PROJECT_NAME}
@@ -24,8 +29,6 @@ add_executable(
     "src/json/lex.cc"
     "src/json/parser.cc"
 )
-
-# target_link_libraries(${CMAKE_PROJECT_NAME} fmt)
 
 if (CMAKE_BUILD_TYPE MATCHES "Asan")
     set(CMAKE_BUILD_TYPE "Debug")
