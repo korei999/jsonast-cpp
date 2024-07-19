@@ -23,7 +23,6 @@ struct ArenaNode;
 struct ArenaBlock
 {
     ArenaBlock* pNext = nullptr;
-    ArenaNode* pLatest = nullptr;
     u8 pData[];
 };
 
@@ -38,6 +37,8 @@ struct Arena : __BaseAllocator
 {
     ArenaBlock* pBlocks = nullptr;
     size_t blockSize = 0;
+    ArenaNode* pLatest = nullptr;
+    ArenaBlock* pLatestBlock = nullptr;
 
     Arena(size_t cap);
 
@@ -87,6 +88,10 @@ Arena::newBlock()
     *ppLastBlock = reinterpret_cast<ArenaBlock*>(malloc(sizeof(ArenaBlock) + this->blockSize));
     memset(*ppLastBlock, 0, sizeof(ArenaBlock) + this->blockSize);
 
+    auto* pNode = ARENA_NODE_GET_FROM_BLOCK(*ppLastBlock);
+    this->pLatest = pNode;
+    this->pLatestBlock = *ppLastBlock;
+
     return *ppLastBlock;
 }
 
@@ -94,23 +99,6 @@ inline bool
 Arena::fitsNode(ArenaNode* pNode, size_t size)
 {
     /* TODO: get max contiguous space if we get bunch of freed nodes in the row, while not overflowing */
-
-    /*size_t maxSize = 0;*/
-    /*auto* pB = ARENA_NODE_GET_FROM_BLOCK(pNode->pBlock);*/
-
-    /*while (pNode->size == 0)*/
-    /*{*/
-    /*    if (!pNode->pNext)*/
-    /*    {*/
-    /*        maxSize += this->blockSize - (reinterpret_cast<u8*>(pNode) - reinterpret_cast<u8*>(pB));*/
-    /*        break;*/
-    /*    }*/
-    /*    else*/
-    /*    {*/
-    /*        maxSize += reinterpret_cast<u8*>(pNode) - reinterpret_cast<u8*>(pB);*/
-    /*    }*/
-    /*}*/
-
     return static_cast<size_t>(reinterpret_cast<u8*>(pNode->pNext) - reinterpret_cast<u8*>(pNode)) > size;
 }
 
@@ -137,22 +125,18 @@ Arena::alignedBytes(size_t bytes)
 inline void*
 Arena::alloc(size_t memberCount, size_t memberSize)
 {
-    auto* pFreeBlock = this->getFreeBlock();
+    auto* pFreeBlock = this->pLatestBlock;
 
     auto requested = memberCount * memberSize;
     auto aligned = this->alignedBytes(requested + sizeof(ArenaNode));
     assert(aligned <= this->blockSize && "requested size is > than one block");
 
 repeat:
-    if (!pFreeBlock) pFreeBlock = this->newBlock();
-
     /* skip pNext */
     auto* pFreeBlockOff = ARENA_NODE_GET_FROM_BLOCK(pFreeBlock);
 
     /* find node with pNext == nullptr, this one is free to allocate */
-    ArenaNode* pNode = pFreeBlockOff;
-    if (pFreeBlock->pLatest)
-        pNode = pFreeBlock->pLatest;
+    ArenaNode* pNode = this->pLatest;
     while (pNode->pNext)
     {
         /*size_t off1 = (u8*)pNode - (u8*)pFreeBlockOff;*/
@@ -172,12 +156,13 @@ repeat:
     if (nextAligned >= this->blockSize)
     {
         pFreeBlock = pFreeBlock->pNext;
+        pFreeBlock = this->newBlock();
         goto repeat;
     }
 
     pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
     pNode->size = requested;
-    pFreeBlock->pLatest = pNode;
+    this->pLatest = pNode;
 
     return &pNode->pData;
 }
@@ -195,18 +180,18 @@ Arena::realloc(void* p, size_t size)
     ArenaNode* pNode = ARENA_NODE_GET_FROM_DATA(p);
     auto aligned = alignedBytes(size);
 
-    if (size <= pNode->size || this->fitsNode(pNode, aligned))
-    {
-        pNode->size = size;
-        return &pNode->pData;
-    }
-    else
-    {
+    /*if (size <= pNode->size || this->fitsNode(pNode, aligned))*/
+    /*{*/
+    /*    pNode->size = size;*/
+    /*    return &pNode->pData;*/
+    /*}*/
+    /*else*/
+    /*{*/
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
-        this->free(p);
+        /*this->free(p);*/
         return pR;
-    }
+    /*}*/
 }
 
 inline void

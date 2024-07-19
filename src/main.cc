@@ -11,7 +11,7 @@ main(int argCount, char* paArgs[])
         exit(3);
     }
 
-    adt::Arena arena(adt::SIZE_1M * 500);
+    adt::Arena arena(adt::SIZE_1M * 200);
 
     json::Parser p(&arena);
     p.load(paArgs[1]);
