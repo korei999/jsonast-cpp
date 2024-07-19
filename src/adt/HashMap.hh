@@ -1,10 +1,31 @@
 #pragma once
 
 #include "Array.hh"
-#include "String.hh"
+/*#include "String.hh"*/
 
 namespace adt
 {
+
+template<typename T>
+inline size_t
+fnHash(T& x)
+{
+    return (x);
+}
+
+template<>
+inline size_t
+fnHash<size_t>(size_t& x)
+{
+    return x;
+}
+
+/*template<>*/
+/*inline size_t*/
+/*fnHash<String>(String& x)*/
+/*{*/
+/*    return hashFNV(x);*/
+/*}*/
 
 constexpr f64 HASHMAP_DEFAULT_LOAD_FACTOR = 0.5;
 
@@ -26,16 +47,19 @@ struct HashMapIt
 };
 
 /* simple linear probing */
-template<typename T, typename ALLOC = BaseAllocator>
+template<typename T>
 struct HashMap
 {
-    ALLOC* allocator;
+    BaseAllocator* allocator;
     Array<Bucket<T>> aBuckets;
     f64 maxLoadFactor;
     size_t bucketCount = 0;
 
-    HashMap(ALLOC* pAllocator) : allocator(pAllocator), aBuckets(pAllocator), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
-    HashMap(ALLOC* pAllocator, size_t prealloc) : allocator(pAllocator), aBuckets(pAllocator, prealloc), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
+    HashMap(BaseAllocator* pAllocator) : allocator(pAllocator), aBuckets(pAllocator), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
+    HashMap(BaseAllocator* pAllocator, size_t prealloc) : allocator(pAllocator), aBuckets(pAllocator, prealloc), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
+
+    Bucket<T>& operator[](size_t i) { return this->aBuckets[i]; }
+    const Bucket<T>& operator[](size_t i) const { return this->aBuckets[i]; }
 
     f64 loadFactor() const { return static_cast<f64>(this->bucketCount) / static_cast<f64>(this->aBuckets.capacity); }
     size_t capacity() const { return this->aBuckets.capacity; }
@@ -47,9 +71,9 @@ struct HashMap
     void free() { this->aBuckets.free(); }
 };
 
-template<typename T, typename ALLOC>
+template<typename T>
 HashMapIt<T>
-HashMap<T, ALLOC>::insert(const T& value)
+HashMap<T>::insert(const T& value)
 {
     if (this->loadFactor() >= this->maxLoadFactor)
         this->rehash(this->capacity() * 2);
@@ -77,9 +101,9 @@ HashMap<T, ALLOC>::insert(const T& value)
     };
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 HashMapIt<T>
-HashMap<T, ALLOC>::search(const T& value)
+HashMap<T>::search(const T& value)
 {
     size_t hash = fnHash(value);
     size_t idx = hash % this->capacity();
@@ -106,19 +130,19 @@ HashMap<T, ALLOC>::search(const T& value)
     return ret;
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 void
-HashMap<T, ALLOC>::remove(size_t i)
+HashMap<T>::remove(size_t i)
 {
     this->aBuckets[i].bDeleted = true;
     this->aBuckets[i].bOccupied = false;
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 void
-HashMap<T, ALLOC>::rehash(size_t _size)
+HashMap<T>::rehash(size_t _size)
 {
-    auto mNew = HashMap<T, ALLOC>(_size, HASHMAP_DEFAULT_LOAD_FACTOR, this->aBuckets.allocator);
+    auto mNew = HashMap<T>(this->aBuckets.allocator, _size);
 
     for (size_t i = 0; i < this->aBuckets.capacity; i++)
         if (this->aBuckets[i].bOccupied)
@@ -128,9 +152,9 @@ HashMap<T, ALLOC>::rehash(size_t _size)
     *this = mNew;
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 HashMapIt<T>
-HashMap<T, ALLOC>::tryInsert(const T& value)
+HashMap<T>::tryInsert(const T& value)
 {
     auto f = this->search(value);
     if (f.pData) return f;
