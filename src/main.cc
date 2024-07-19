@@ -23,5 +23,4 @@ main(int argCount, char* paArgs[])
         p.print();
 
     alloc.freeAll();
-    /*alloc.freeAll();*/
 }
