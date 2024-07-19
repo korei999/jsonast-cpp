@@ -18,8 +18,6 @@
 namespace adt
 {
 
-struct ArenaNode;
-
 struct ArenaBlock
 {
     ArenaBlock* pNext = nullptr;
@@ -29,6 +27,7 @@ struct ArenaBlock
 struct ArenaNode
 {
     ArenaNode* pNext = nullptr;
+    ArenaBlock* pBlock;
     size_t size = 0;
     u8 pData[]; /* flexible array member */
 };
@@ -99,7 +98,7 @@ inline bool
 Arena::fitsNode(ArenaNode* pNode, size_t size)
 {
     /* TODO: get max contiguous space if we get bunch of freed nodes in the row, while not overflowing */
-    return static_cast<size_t>(reinterpret_cast<u8*>(pNode->pNext) - reinterpret_cast<u8*>(pNode)) > size;
+    return size_t((u8*)pNode->pNext - (u8*)pNode) > size;
 }
 
 inline ArenaBlock*
@@ -137,20 +136,10 @@ repeat:
 
     /* find node with pNext == nullptr, this one is free to allocate */
     ArenaNode* pNode = this->pLatest;
-    while (pNode->pNext)
-    {
-        /*size_t off1 = (u8*)pNode - (u8*)pFreeBlockOff;*/
-        /*printf("off1: %zu\n", off1);*/
-
-        pNode = pNode->pNext;
-
-        /*size_t off2 = (u8*)pNode - (u8*)pFreeBlockOff;*/
-        /*printf("off2: %zu\n", off2);*/
-    }
+    while (pNode->pNext) pNode = pNode->pNext;
 
     /* cast to u8* to get correct byte offsets */
     size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pFreeBlockOff;
-    /*printf("nextAligned: %zu, (%% 8? %zu)\n", nextAligned, nextAligned % 8);*/
 
     /* heap overflow */
     if (nextAligned >= this->blockSize)
@@ -162,6 +151,7 @@ repeat:
 
     pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
     pNode->size = requested;
+    pNode->pBlock = pFreeBlock;
     this->pLatest = pNode;
 
     return &pNode->pData;
@@ -179,19 +169,22 @@ Arena::realloc(void* p, size_t size)
 {
     ArenaNode* pNode = ARENA_NODE_GET_FROM_DATA(p);
     auto aligned = alignedBytes(size);
+    size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pNode->pBlock;
 
-    /*if (size <= pNode->size || this->fitsNode(pNode, aligned))*/
-    /*{*/
-    /*    pNode->size = size;*/
-    /*    return &pNode->pData;*/
-    /*}*/
-    /*else*/
-    /*{*/
+    if (pNode == this->pLatest && nextAligned < this->blockSize)
+    {
+        pNode->size = size;
+        pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
+        return p;
+    }
+    else
+    {
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
-        /*this->free(p);*/
+        this->free(p);
+        /*this->pLatest = pNode;*/
         return pR;
-    /*}*/
+    }
 }
 
 inline void
