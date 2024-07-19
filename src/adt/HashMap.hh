@@ -26,17 +26,16 @@ struct HashMapIt
 };
 
 /* simple linear probing */
-template<typename T, typename ALLOC = DefaultAllocator>
+template<typename T, typename ALLOC = BaseAllocator>
 struct HashMap
 {
+    ALLOC* allocator;
+    Array<Bucket<T>> aBuckets;
     f64 maxLoadFactor;
-    Array<Bucket<T>, ALLOC> aBuckets;
     size_t bucketCount = 0;
 
-    HashMap(size_t capacity = SIZE_MIN,
-            f64 _maxLoadFactor = HASHMAP_DEFAULT_LOAD_FACTOR,
-            ALLOC* allocator = &g::StdAllocator)
-        : maxLoadFactor(_maxLoadFactor), aBuckets(capacity, allocator) {}
+    HashMap(ALLOC* pAllocator) : allocator(pAllocator), aBuckets(pAllocator), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
+    HashMap(ALLOC* pAllocator, size_t prealloc) : allocator(pAllocator), aBuckets(pAllocator, prealloc), maxLoadFactor(HASHMAP_DEFAULT_LOAD_FACTOR) {}
 
     f64 loadFactor() const { return static_cast<f64>(this->bucketCount) / static_cast<f64>(this->aBuckets.capacity); }
     size_t capacity() const { return this->aBuckets.capacity; }

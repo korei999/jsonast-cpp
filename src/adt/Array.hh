@@ -5,16 +5,16 @@
 namespace adt
 {
 
-template<typename T, typename ALLOC>
+template<typename T>
 struct Array
 {
-    ALLOC* allocator;
+    BaseAllocator* allocator;
     T* pData = nullptr;
     size_t size = 0;
     size_t capacity = 0;
 
-    Array(ALLOC* _allocator);
-    Array(ALLOC* _allocator, size_t _capacity);
+    Array(BaseAllocator* _allocator);
+    Array(BaseAllocator* _allocator, size_t _capacity);
 
     T& operator[](size_t i) { return this->pData[i]; }
 
@@ -27,23 +27,23 @@ struct Array
     void free() { this->allocator->free(this->pData); }
 };
 
-template<typename T, typename ALLOC>
-Array<T, ALLOC>::Array(ALLOC* _allocator)
+template<typename T>
+Array<T>::Array(BaseAllocator* _allocator)
     : allocator(_allocator), capacity(SIZE_MIN)
 {
     pData = static_cast<T*>(this->allocator->alloc(this->capacity, sizeof(T)));
 }
 
-template<typename T, typename ALLOC>
-Array<T, ALLOC>::Array(ALLOC* _allocator, size_t _capacity)
+template<typename T>
+Array<T>::Array(BaseAllocator* _allocator, size_t _capacity)
     : allocator(_allocator), capacity(_capacity)
 {
     pData = static_cast<T*>(this->allocator->alloc(this->capacity, sizeof(T)));
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 T*
-Array<T, ALLOC>::push(const T& data)
+Array<T>::push(const T& data)
 {
     if (this->size >= this->capacity)
         this->reallocate(this->capacity * 2);
@@ -53,23 +53,23 @@ Array<T, ALLOC>::push(const T& data)
     return &this->back();
 }
 
-template<typename T, typename ALLOC>
-T&
-Array<T, ALLOC>::back()
+    template<typename T>
+    T&
+Array<T>::back()
 {
     return this->pData[this->size - 1];
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 T&
-Array<T, ALLOC>::front()
+Array<T>::front()
 {
     return this->pData[0];
 }
 
-template<typename T, typename ALLOC>
+template<typename T>
 void
-Array<T, ALLOC>::reallocate(size_t _size)
+Array<T>::reallocate(size_t _size)
 {
     this->capacity = _size;
     this->pData = static_cast<T*>(this->allocator->realloc(this->pData, sizeof(T) * _size));

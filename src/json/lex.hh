@@ -1,7 +1,7 @@
 #pragma once
 
 #include "String.hh"
-#include "Arena.hh"
+#include "allocator.hh"
 
 namespace json
 {
@@ -31,11 +31,11 @@ struct Token
 
 struct Lexer
 {
-    adt::Arena* pArena {};
+    adt::BaseAllocator* pArena {};
     adt::String sFile;
     size_t pos = 0;
 
-    Lexer(adt::Arena* p) : pArena(p) {}
+    Lexer(adt::BaseAllocator* p) : pArena(p) {}
 
     void loadFile(adt::String path);
     void skipWhiteSpace();

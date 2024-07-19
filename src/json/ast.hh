@@ -36,8 +36,8 @@ union Val
     adt::String sv;
     long l;
     double d;
-    adt::Array<Object, adt::Arena> a;
-    adt::Array<Object, adt::Arena> o;
+    adt::Array<Object> a;
+    adt::Array<Object> o;
     bool b;
 };
 

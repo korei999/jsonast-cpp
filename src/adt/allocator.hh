@@ -17,18 +17,18 @@ constexpr size_t SIZE_1M = SIZE_1K * SIZE_1K;
 constexpr size_t SIZE_8M = 8 * SIZE_1M; 
 constexpr size_t SIZE_1G = SIZE_1M * SIZE_1K; 
 
-struct __BaseAllocator
+struct BaseAllocator
 {
-    void* alloc(size_t memberCount, size_t memberSize);
-    void free(void* p);
-    void* realloc(void* p, size_t size);
+    virtual void* alloc(size_t memberCount, size_t memberSize) = 0;
+    virtual void free(void* p) = 0;
+    virtual void* realloc(void* p, size_t size) = 0;
 };
 
-struct DefaultAllocator : __BaseAllocator
+struct DefaultAllocator : BaseAllocator
 {
-    void* alloc(size_t memberCount, size_t memberSize) { return ::calloc(memberCount, memberSize); }
-    void free(void* p) { ::free(p); }
-    void* realloc(void* p, size_t size) { return ::realloc(p, size); }
+    virtual void* alloc(size_t memberCount, size_t memberSize) override { return ::calloc(memberCount, memberSize); }
+    virtual void free(void* p) override { ::free(p); }
+    virtual void* realloc(void* p, size_t size) override { return ::realloc(p, size); }
 };
 
 inline DefaultAllocator StdAllocator {};

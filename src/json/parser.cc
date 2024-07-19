@@ -109,7 +109,7 @@ void
 Parser::parseObject(Object* pNode)
 {
     pNode->tagVal.tag = TAG::OBJECT;
-    pNode->tagVal.val.o = adt::Array<Object, adt::Arena>(this->pArena, 8);
+    pNode->tagVal.val.o = adt::Array<Object>(this->pArena, 8);
     auto& aObjs = getObject(pNode);
 
     for (; this->tCurr.type != Token::RBRACE; this->next())
@@ -139,7 +139,7 @@ void
 Parser::parseArray(Object* pNode)
 {
     pNode->tagVal.tag = TAG::ARRAY;
-    pNode->tagVal.val.a = adt::Array<Object, adt::Arena>(this->pArena, 8);
+    pNode->tagVal.val.a = adt::Array<Object>(this->pArena, 8);
     auto& aTVs = getArray(pNode);
 
     /* collect each key/value pair inside array */

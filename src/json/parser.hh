@@ -8,11 +8,11 @@ namespace json
 
 struct Parser
 {
-    adt::Arena* pArena;
+    adt::BaseAllocator* pArena;
     adt::String sName;
     Object* pHead;
 
-    Parser(adt::Arena* p) : pArena(p), l(p) {}
+    Parser(adt::BaseAllocator* p) : pArena(p), l(p) {}
 
     void load(adt::String path);
     void parse();
@@ -36,23 +36,23 @@ private:
 };
 
 /* Linear search inside JSON object. Returns nullptr if not found */
-// inline Object*
-// searchObject(std::vector<Object>& aObj, adt::String svKey)
-// {
-//     for (auto& node : aObj)
-//         if (node.svKey == svKey)
-//             return &node;
-// 
-//     return nullptr;
-// }
+inline Object*
+searchObject(adt::Array<Object>& aObj, adt::String svKey)
+{
+    for (size_t i = 0; i < aObj.size; i++)
+        if (aObj[i].svKey == svKey)
+            return &aObj[i];
 
-inline adt::Array<Object, adt::Arena>&
+    return nullptr;
+}
+
+inline adt::Array<Object>&
 getObject(Object* obj)
 {
     return obj->tagVal.val.o;
 }
 
-inline adt::Array<Object, adt::Arena>&
+inline adt::Array<Object>&
 getArray(Object* obj)
 {
     return obj->tagVal.val.a;

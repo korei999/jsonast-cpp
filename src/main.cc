@@ -1,5 +1,6 @@
 #include "logs.hh"
 #include "json/parser.hh"
+#include "MapAllocator.hh"
 
 int
 main(int argCount, char* paArgs[])

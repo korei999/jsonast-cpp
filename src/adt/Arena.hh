@@ -32,7 +32,7 @@ struct ArenaNode
     u8 pData[]; /* flexible array member */
 };
 
-struct Arena : __BaseAllocator
+struct Arena : BaseAllocator
 {
     ArenaBlock* pBlocks = nullptr;
     size_t blockSize = 0;
@@ -43,9 +43,9 @@ struct Arena : __BaseAllocator
 
     void reset();
     size_t alignedBytes(size_t bytes);
-    void* alloc(size_t memberCount, size_t size);
-    void free(void* p);
-    void* realloc(void* p, size_t size);
+    virtual void* alloc(size_t memberCount, size_t size) override;
+    virtual void free(void* p) override;
+    virtual void* realloc(void* p, size_t size) override;
     void freeArena();
 
 private:
