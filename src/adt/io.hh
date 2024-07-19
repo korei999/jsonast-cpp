@@ -5,7 +5,7 @@
 namespace adt
 {
 
-String
+inline String
 loadFile(BaseAllocator* pAlloc, String path)
 {
     String ret;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <string.h>
-
 #include "allocator.hh"
 #include "utils.hh"
 
@@ -59,7 +57,9 @@ constexpr String
 StringCreate(BaseAllocator* p, const char* str, size_t size)
 {
     char* pData = static_cast<char*>(p->alloc(size, sizeof(char)));
-    strncpy(pData, str, size);
+    for (size_t i = 0; i < size; i++)
+        pData[i] = str[i];
+
     return {pData, size};
 }
 
@@ -67,6 +67,15 @@ constexpr String
 StringCreate(BaseAllocator* p, const char* str)
 {
     return StringCreate(p, str, nullTermStringSize(str));
+}
+
+constexpr size_t
+fnHash(const String& str)
+{
+    size_t hash = 0xCBF29CE484222325;
+    for (size_t i = 0; i < str.size; i++)
+        hash = (hash ^ size_t(str[i])) * 0x100000001B3;
+    return hash;
 }
 
 } /* namespace adt */

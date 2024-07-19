@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Array.hh"
-/*#include "String.hh"*/
 
 namespace adt
 {
@@ -18,16 +17,6 @@ inline size_t
 fnHash<size_t>(size_t& x)
 {
     return x;
-}
-
-template<>
-inline size_t
-fnHash<String>(String& str)
-{
-    size_t hash = 0xCBF29CE484222325;
-    for (size_t i = 0; i < str.size; i++)
-        hash = (hash ^ size_t(str[i])) * 0x100000001B3;
-    return hash;
 }
 
 constexpr f64 HASHMAP_DEFAULT_LOAD_FACTOR = 0.5;

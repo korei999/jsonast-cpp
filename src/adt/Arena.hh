@@ -194,6 +194,8 @@ struct AtomicArena : Arena
 {
     mtx_t mtxA;
 
+    AtomicArena(size_t cap);
+
     void* alloc(size_t memberCount, size_t memberSize);
     void* realloc(void* p, size_t size);
     void free(void* p);

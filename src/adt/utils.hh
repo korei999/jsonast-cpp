@@ -27,6 +27,13 @@ min(A& l, B& r)
     return l < r ? l : r;
 }
 
+template<typename A>
+constexpr size_t
+size(A& a)
+{
+    return LEN(a);
+}
+
 inline f64
 timeNowMS()
 {

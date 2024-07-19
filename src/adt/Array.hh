@@ -6,6 +6,11 @@ namespace adt
 {
 
 template<typename T>
+struct ArrayIt
+{
+}
+
+template<typename T>
 struct Array
 {
     BaseAllocator* allocator;
