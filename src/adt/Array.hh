@@ -6,11 +6,6 @@ namespace adt
 {
 
 template<typename T>
-struct ArrayIt
-{
-}
-
-template<typename T>
 struct Array
 {
     BaseAllocator* allocator;
@@ -30,6 +25,23 @@ struct Array
     bool empty() const { return size == 0;  }
     void reallocate(size_t _size);
     void free() { this->allocator->free(this->pData); }
+
+    struct It
+    {
+        T* p;
+
+        It(T* _p) : p(_p) {}
+
+        T& operator*() const { return *p; }
+        T* operator->() const { return p; }
+        It& operator++() { this->p++; return *this; }
+        It& operator++(int) { It tmp = *this; (*this)++; return tmp; }
+        friend bool operator==(const It& l, const It& r) { return l.p == r.p; }
+        friend bool operator!=(const It& l, const It& r) { return l.p != r.p; }
+    };
+
+    It begin() { return &this->pData[0]; }
+    It end() { return &this->pData[this->size]; }
 };
 
 template<typename T>

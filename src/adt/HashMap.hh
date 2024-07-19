@@ -30,7 +30,7 @@ struct Bucket
 };
 
 template <typename T>
-struct HashMapIt
+struct HashMapRet
 {
     T* pData;
     size_t hash;
@@ -55,16 +55,16 @@ struct HashMap
 
     f64 loadFactor() const { return static_cast<f64>(this->bucketCount) / static_cast<f64>(this->aBuckets.capacity); }
     size_t capacity() const { return this->aBuckets.capacity; }
-    HashMapIt<T> insert(const T& value);
-    HashMapIt<T> search(const T& value);
+    HashMapRet<T> insert(const T& value);
+    HashMapRet<T> search(const T& value);
     void remove(size_t i);
     void rehash(size_t _size);
-    HashMapIt<T> tryInsert(const T& value);
+    HashMapRet<T> tryInsert(const T& value);
     void free() { this->aBuckets.free(); }
 };
 
 template<typename T>
-HashMapIt<T>
+HashMapRet<T>
 HashMap<T>::insert(const T& value)
 {
     if (this->loadFactor() >= this->maxLoadFactor)
@@ -94,13 +94,13 @@ HashMap<T>::insert(const T& value)
 }
 
 template<typename T>
-HashMapIt<T>
+HashMapRet<T>
 HashMap<T>::search(const T& value)
 {
     size_t hash = fnHash(value);
     size_t idx = hash % this->capacity();
 
-    HashMapIt<T> ret;
+    HashMapRet<T> ret;
     ret.hash = hash;
     ret.pData = nullptr;
     ret.bInserted = false;
@@ -145,7 +145,7 @@ HashMap<T>::rehash(size_t _size)
 }
 
 template<typename T>
-HashMapIt<T>
+HashMapRet<T>
 HashMap<T>::tryInsert(const T& value)
 {
     auto f = this->search(value);
