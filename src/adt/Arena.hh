@@ -171,13 +171,13 @@ Arena::realloc(void* p, size_t size)
     auto aligned = alignedBytes(size);
     size_t nextAligned = ((u8*)pNode + aligned) - (u8*)pNode->pBlock;
 
-    if (pNode == this->pLatest && nextAligned < this->blockSize)
-    {
-        pNode->size = size;
-        pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);
-        return p;
-    }
-    else
+    /*if (pNode == this->pLatest && nextAligned < this->blockSize)*/
+    /*{*/
+    /*    pNode->size = size;*/
+    /*    pNode->pNext = (ArenaNode*)((u8*)pNode + aligned);*/
+    /*    return p;*/
+    /*}*/
+    /*else*/
     {
         void* pR = this->alloc(size, 1);
         memcpy(pR, p, pNode->size);
