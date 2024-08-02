@@ -2,7 +2,6 @@
 
 #include "String.hh"
 #include "Array.hh"
-#include "Arena.hh"
 
 namespace json
 {
@@ -32,7 +31,7 @@ struct Object;
 
 union Val
 {
-    adt::Nullptr n;
+    void* n;
     adt::String sv;
     long l;
     double d;

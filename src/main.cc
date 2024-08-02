@@ -1,6 +1,6 @@
 #include "logs.hh"
 #include "json/parser.hh"
-#include "MapAllocator.hh"
+#include "ArrayAllocator.hh"
 
 int
 main(int argCount, char* paArgs[])
@@ -12,8 +12,7 @@ main(int argCount, char* paArgs[])
         exit(3);
     }
 
-    adt::Arena alloc(adt::SIZE_1M * 200);
-    /*adt::MapAllocator alloc(adt::SIZE_MIN);*/
+    adt::ArrayAllocator alloc(adt::SIZE_8M);
 
     json::Parser p(&alloc);
     p.load(paArgs[1]);
@@ -22,5 +21,7 @@ main(int argCount, char* paArgs[])
     if (argCount >= 3 && adt::String(paArgs[2]) == "-p")
         p.print();
 
+#ifndef NDEBUG
     alloc.freeAll();
+#endif
 }

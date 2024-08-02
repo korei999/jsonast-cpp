@@ -1,6 +1,6 @@
 #pragma once
 
-#include "allocator.hh"
+#include "Allocator.hh"
 
 namespace adt
 {
@@ -8,90 +8,95 @@ namespace adt
 template<typename T>
 struct Array
 {
-    BaseAllocator* allocator;
-    T* pData = nullptr;
-    size_t size = 0;
-    size_t capacity = 0;
+    Allocator* _pAlloc = nullptr;
+    T* _pData = nullptr;
+    u32 _size = 0;
+    u32 _capacity = 0;
 
-    Array(BaseAllocator* _allocator);
-    Array(BaseAllocator* _allocator, size_t _capacity);
+    Array() = default;
+    Array(Allocator* pAlloc);
+    Array(Allocator* pAlloc, u32 capacity);
 
-    T& operator[](size_t i) { return this->pData[i]; }
+    T& operator[](u32 i) { return _pData[i]; }
+    const T& operator[](u32 i) const { return _pData[i]; }
 
     T* push(const T& data);
-    T& back();
-    T& front();
-    T* data() { return this->pData; }
-    bool empty() const { return size == 0;  }
-    void reallocate(size_t _size);
-    void free() { this->allocator->free(this->pData); }
+    T* pop();
+    T& back() { return _pData[_size - 1]; }
+    const T& back() const { return back(); }
+    T& front() { return _pData[0]; }
+    const T& front() const { front(); }
+    T* data() { return _pData; }
+    const T* data() const { return data(); }
+    bool empty() const { return _size == 0;  }
+    void resize(u32 _size);
+    void grow(u32 _size);
+    void destroy() { _pAlloc->free(_pData); }
 
     struct It
     {
-        T* p;
+        T* _p;
 
-        It(T* _p) : p(_p) {}
+        It(T* p) : _p(p) {}
 
-        T& operator*() const { return *p; }
-        T* operator->() const { return p; }
-        It& operator++() { this->p++; return *this; }
-        It& operator++(int) { It tmp = *this; (*this)++; return tmp; }
-        friend bool operator==(const It& l, const It& r) { return l.p == r.p; }
-        friend bool operator!=(const It& l, const It& r) { return l.p != r.p; }
+        T& operator*() const { return *_p; }
+        T* operator->() const { return _p; }
+        It operator++() { _p++; return *this; }
+        It operator++(int) { It tmp = *this; (*this)++; return tmp; }
+        friend bool operator==(const It& l, const It& r) { return l._p == r._p; }
+        friend bool operator!=(const It& l, const It& r) { return l._p != r._p; }
     };
 
-    It begin() { return &this->pData[0]; }
-    It end() { return &this->pData[this->size]; }
+    It begin() { return &_pData[0]; }
+    It end() { return &_pData[_size]; }
 };
 
 template<typename T>
-Array<T>::Array(BaseAllocator* _allocator)
-    : allocator(_allocator), capacity(SIZE_MIN)
-{
-    pData = static_cast<T*>(this->allocator->alloc(this->capacity, sizeof(T)));
-}
+Array<T>::Array(Allocator* _allocator)
+    : Array<T>(_allocator, SIZE_MIN) {}
 
 template<typename T>
-Array<T>::Array(BaseAllocator* _allocator, size_t _capacity)
-    : allocator(_allocator), capacity(_capacity)
-{
-    pData = static_cast<T*>(this->allocator->alloc(this->capacity, sizeof(T)));
-}
+Array<T>::Array(Allocator* pAlloc, u32 capacity)
+    : _pAlloc(pAlloc), _pData((T*)(_pAlloc->alloc(capacity, sizeof(T)))), _size(0), _capacity(capacity) {}
 
 template<typename T>
-T*
+inline T*
 Array<T>::push(const T& data)
 {
-    if (this->size >= this->capacity)
-        this->reallocate(this->capacity * 2);
+    assert(_capacity > 0 && "pushing to the uninitialized array");
 
-    this->pData[this->size++] = data;
+    if (_size >= _capacity)
+        grow(_capacity * 2);
 
-    return &this->back();
-}
+    _pData[_size++] = data;
 
-    template<typename T>
-    T&
-Array<T>::back()
-{
-    return this->pData[this->size - 1];
+    return &back();
 }
 
 template<typename T>
-T&
-Array<T>::front()
+inline T*
+Array<T>::pop()
 {
-    return this->pData[0];
+    assert(!empty() && "popping from the empty array!");
+    return &_pData[--_size];
 }
 
 template<typename T>
-void
-Array<T>::reallocate(size_t _size)
+inline void
+Array<T>::resize(u32 size)
 {
-    this->capacity = _size;
-    this->pData = static_cast<T*>(this->allocator->realloc(this->pData, sizeof(T) * _size));
+    if (_size < size)
+        grow(size);
 
-    /*memset(&this->pData[this->size], 0, sizeof(T) * (this->capacity - this->size));*/
+    _size = size;
+}
+
+template<typename T>
+inline void
+Array<T>::grow(u32 size)
+{
+    _capacity = size;
+    _pData = (T*)(_pAlloc->realloc(_pData, sizeof(T) * size));
 }
 
 } /* namespace adt */

@@ -8,21 +8,22 @@ namespace json
 
 struct Parser
 {
-    adt::BaseAllocator* pArena;
-    adt::String sName;
-    Object* pHead;
+    adt::Allocator* _pArena;
+    adt::String _sName;
+    Object* _pHead;
 
-    Parser(adt::BaseAllocator* p) : pArena(p), l(p) {}
+    Parser(adt::Allocator* p) : _pArena(p), _l(p) {}
 
     void load(adt::String path);
     void parse();
     void print();
-    void printNode(Object* pNode, adt::String svEnd);
+    void printNode(Object* pNode, adt::String svEnd, int depth);
+    Object* getHeadObj() { return _pHead; }
 
 private:
-    Lexer l;
-    Token tCurr;
-    Token tNext;
+    Lexer _l;
+    Token _tCurr;
+    Token _tNext;
 
     void expect(enum Token::TYPE t, adt::String svFile, int line);
     void next();
@@ -39,7 +40,7 @@ private:
 inline Object*
 searchObject(adt::Array<Object>& aObj, adt::String svKey)
 {
-    for (size_t i = 0; i < aObj.size; i++)
+    for (u32 i = 0; i < aObj._size; i++)
         if (aObj[i].svKey == svKey)
             return &aObj[i];
 
@@ -71,7 +72,7 @@ getDouble(Object* obj)
 }
 
 inline adt::String
-getStringView(Object* obj)
+getString(Object* obj)
 {
     return obj->tagVal.val.sv;
 }

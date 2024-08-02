@@ -1,14 +1,14 @@
 #pragma once
 
 #include "String.hh"
-#include "allocator.hh"
+#include "Allocator.hh"
 
 namespace json
 {
 
 struct Token
 {
-    enum TYPE
+    enum TYPE : u8
     {
         LBRACE = '{',
         RBRACE = '}',
@@ -17,8 +17,8 @@ struct Token
         QUOTE = '"',
         IDENT = 'I',
         NUMBER = 'N',
-        TRUE = 'T',
-        FALSE = 'F',
+        TRUE_ = 'T',
+        FALSE_ = 'F',
         NULL_ = 'n',
         ASSIGN = ':',
         COMMA = ',',
@@ -31,11 +31,11 @@ struct Token
 
 struct Lexer
 {
-    adt::BaseAllocator* pArena {};
-    adt::String sFile;
-    size_t pos = 0;
+    adt::Allocator* _pArena {};
+    adt::String _sFile;
+    u32 _pos = 0;
 
-    Lexer(adt::BaseAllocator* p) : pArena(p) {}
+    Lexer(adt::Allocator* p) : _pArena(p) {}
 
     void loadFile(adt::String path);
     void skipWhiteSpace();

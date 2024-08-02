@@ -1,5 +1,5 @@
 {
-  "first_name": "John",
+  "first_name": "{{John}}",
   "last_name": "Smith",
   "is_alive": true,
   "age": 27,
@@ -11,7 +11,7 @@
   },
   "phone_numbers": [
     {
-      "type": "home",
+      "type": "{{home}}",
       "number": "212 555-1234"
     },
     {
