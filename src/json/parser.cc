@@ -365,4 +365,26 @@ Parser::printNode(Object* pNode, adt::String svEnd, int depth)
     }
 }
 
+void
+Parser::traverse(Object* pNode, bool (*pfn)(Object* p, void* args), void* args)
+{
+    if (pfn(pNode, args)) return;
+
+    switch (pNode->tagVal.tag)
+    {
+        default:
+            break;
+
+        case TAG::ARRAY:
+        case TAG::OBJECT:
+            {
+                auto& obj = getObject(pNode);
+
+                for (u32 i = 0; i < obj._size; i++)
+                    traverse(&obj[i], pfn, args);
+            }
+            break;
+    }
+}
+
 } /* namespace json */

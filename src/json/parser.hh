@@ -19,6 +19,8 @@ struct Parser
     void print();
     void printNode(Object* pNode, adt::String svEnd, int depth);
     Object* getHeadObj() { return _pHead; }
+    void traverse(Object* pNode, bool (*pfn)(Object* p, void* a), void* args);
+    void traverse(bool (*pfn)(Object* p, void* a), void* args) { traverse(_pHead, pfn, args); }
 
 private:
     Lexer _l;
