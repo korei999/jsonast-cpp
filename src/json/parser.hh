@@ -6,6 +6,8 @@
 namespace json
 {
 
+void printNode(Object* pNode, adt::String svEnd, int depth);
+
 struct Parser
 {
     adt::Allocator* _pArena;
@@ -17,7 +19,6 @@ struct Parser
     void load(adt::String path);
     void parse();
     void print();
-    static void printNode(Object* pNode, adt::String svEnd, int depth);
     Object* getHeadObj() { return _pHead; }
     void traverse(Object* pNode, bool (*pfn)(Object* p, void* a), void* args);
     void traverse(bool (*pfn)(Object* p, void* a), void* args) { traverse(_pHead, pfn, args); }

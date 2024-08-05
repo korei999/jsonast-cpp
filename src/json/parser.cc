@@ -208,7 +208,7 @@ Parser::print()
 }
 
 void
-Parser::printNode(Object* pNode, adt::String svEnd, int depth)
+printNode(Object* pNode, adt::String svEnd, int depth)
 {
     adt::String key = pNode->svKey;
 

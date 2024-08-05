@@ -23,7 +23,7 @@ main(int argCount, char* paArgs[])
 
     if (argCount >= 3 && adt::String(paArgs[2]) == "-e")
     {
-        json::Object oHead = json::putObject("", &alloc);
+        json::Object oHead = json::putObject({}, &alloc);
         json::pushToObject(&oHead, json::putLong("n0", 0));
         json::pushToObject(&oHead, json::putLong("n1", 1));
         json::pushToObject(&oHead, json::putLong("n2", 2));
@@ -39,7 +39,7 @@ main(int argCount, char* paArgs[])
         json::pushToArray(pArr0, json::putDouble({}, -4.4));
         json::pushToArray(pArr0, json::putDouble({}, -5.5));
 
-        json::Parser::printNode(&oHead, {}, 0);
+        json::printNode(&oHead, {}, 0);
         COUT("\n");
     }
 
