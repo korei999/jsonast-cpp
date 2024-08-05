@@ -37,6 +37,7 @@ if (CMAKE_BUILD_TYPE MATCHES "Asan")
 endif()
 
 if (CMAKE_BUILD_TYPE MATCHES "Debug")
+    add_compile_definitions("-DDEBUG")
     target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function)
 endif()
 

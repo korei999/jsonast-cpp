@@ -17,7 +17,7 @@ struct Parser
     void load(adt::String path);
     void parse();
     void print();
-    void printNode(Object* pNode, adt::String svEnd, int depth);
+    static void printNode(Object* pNode, adt::String svEnd, int depth);
     Object* getHeadObj() { return _pHead; }
     void traverse(Object* pNode, bool (*pfn)(Object* p, void* a), void* args);
     void traverse(bool (*pfn)(Object* p, void* a), void* args) { traverse(_pHead, pfn, args); }
@@ -83,6 +83,81 @@ inline bool
 getBool(Object* obj)
 {
     return obj->tagVal.val.b;
+}
+
+inline Object
+putObject(adt::String key, adt::Allocator* pAlloc)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::OBJECT, .val {.o {pAlloc}}}
+    };
+}
+
+inline Object
+putArray(adt::String key, adt::Allocator* pAlloc)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::ARRAY, .val {.a {pAlloc}}}
+    };
+}
+
+inline Object
+putLong(adt::String key, long l)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::LONG, .val {.l = l}}
+    };
+}
+
+inline Object
+putDouble(adt::String key, double d)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::DOUBLE, .val {.d = d}}
+    };
+}
+
+inline Object
+putString(adt::String key, adt::String s)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::STRING, .val {.sv = s}}
+    };
+}
+
+inline Object
+putBool(adt::String key, bool b)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::BOOL, .val {.b = b}}
+    };
+}
+
+inline Object
+putNull(adt::String key)
+{
+    return {
+        .svKey = key,
+        .tagVal {.tag = TAG::NULL_, .val {.n = nullptr}}
+    };
+}
+
+inline Object*
+pushToObject(Object* pObj, Object o)
+{
+    return pObj->tagVal.val.o.push(o);
+}
+
+inline Object*
+pushToArray(Object* pObj, Object o)
+{
+    return pObj->tagVal.val.a.push(o);
 }
 
 } /* namespace json */
