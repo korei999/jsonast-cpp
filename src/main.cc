@@ -43,7 +43,5 @@ main(int argCount, char* paArgs[])
         COUT("\n");
     }
 
-#ifndef NDEBUG
     alloc.freeAll();
-#endif
 }
