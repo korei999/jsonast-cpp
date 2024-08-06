@@ -5,23 +5,16 @@
 int
 main(int argCount, char* paArgs[])
 {
-    if (argCount < 2)
+    adt::ArenaAllocator alloc(adt::SIZE_1M * 50);
+
+    if (argCount < 1)
     {
         COUT("jsonast version: %f\n\n", JSONASTCPP_VERSION);
         COUT("usage: %s <path to json> [-p(print)|-e(json creation example)]\n", paArgs[0]);
         exit(3);
     }
 
-    adt::ArenaAllocator alloc(adt::SIZE_1M * 50);
-
-    json::Parser p(&alloc);
-    p.load(paArgs[1]);
-    p.parse();
-
-    if (argCount >= 3 && adt::String(paArgs[2]) == "-p")
-        p.print();
-
-    if (argCount >= 3 && adt::String(paArgs[2]) == "-e")
+    if (argCount >= 2 && adt::String(paArgs[1]) == "-e")
     {
         json::Object oHead = json::putObject({}, &alloc);
         json::pushToObject(&oHead, json::putLong("n0", 0));
@@ -41,6 +34,14 @@ main(int argCount, char* paArgs[])
 
         json::printNode(&oHead, {}, 0);
         COUT("\n");
+    }
+
+    if (argCount >= 3 && adt::String(paArgs[2]) == "-p")
+    {
+        json::Parser p(&alloc);
+        p.load(paArgs[1]);
+        p.parse();
+        p.print();
     }
 
     alloc.freeAll();
